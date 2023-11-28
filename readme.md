@@ -28,7 +28,7 @@ Additional documents are available:
 
 ```shell
 # clone repository
-$ git clone https://github.com/Lupin3000/RPLidar.git
+$ git clone https://github.com/Captainnemo1/sensor_fusion.git
 
 # change directory
 $ cd RPLidar/
