@@ -30,6 +30,7 @@ class LidarGUI:
         self.start_button = tk.Button(self.master, text="Start", bg="red", fg="white", font=("Arial", 24), command=self.start)
         self.start_button.pack()
 
+
         self.lidar_status_label = tk.Label(master, text="Lidar Status", fg="white", bg="black", anchor=tk.W, font=("Arial", 20), pady=10)
         self.lidar_status_label.pack()
         
@@ -105,7 +106,8 @@ class LidarGUI:
                             if average_distance > 1:
                                 self.show_green()
                             else:
-                                self.show_red()
+                                self.show_red_lidar()
+                                self.show_red_ultrasonic()
 
                             self.master.update_idletasks()
 
@@ -117,7 +119,8 @@ class LidarGUI:
                 self.lidar.disconnect()
                 self.lidar_status_label.config(text="Lidar Status: Stopped")
                 self.ultrasonic_status_label.config(text="Ultrasonic Status: Stopped")
-                self.show_red()  # Set buttons back to red when stopping
+                self.show_red_lidar()
+                self.show_red_ultrasonic()  # Set buttons back to red when stopping
 
     def show_green(self):
         self.draw_lights("green", "green")

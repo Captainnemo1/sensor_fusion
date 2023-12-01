@@ -17,7 +17,7 @@ i2c = busio.I2C(board.SCL, board.SDA)
  
 # Create an ADS1115 object
 ads = ADS.ADS1115(i2c)
-
+average_distance = 0
 def find_zero_front(angle, distance):
     min_range = range(0, 5)
     max_range = range(355, 360)
@@ -51,23 +51,29 @@ def run():
         lidar = RPLidar(port=dev_path, baudrate=BAUDRATE, timeout=TIMEOUT)
         channel = AnalogIn(ads, ADS.P0)
         while True:
-
+        	#idar.clear_scans()
             try:
                 
                 for val in lidar.iter_measures():
                     if val[3] != 0:
                         if find_zero_front(val[2], val[3]):
                             ultrasonic(channel)
+                            #average_distance = (ultrasonic(channel)+val[3])/2
                             continue # Exit the loop after printing the first data point
                     
                         
                 lidar.stop()
                 lidar.stop_motor()
                 lidar.disconnect()
+                lidar.clear_scans()
                 
                 
             except KeyboardInterrupt:
                 exit()
+                lidar.stop()
+                lidar.stop_motor()
+                lidar.disconnect()
+                lidar.clear_scans()
             
     else:
         print('[Error] Could not find the device: {0}'.format(dev_path))

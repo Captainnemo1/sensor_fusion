@@ -107,32 +107,29 @@ class LidarGUI:
 
                     self.lidar_status_label.config(text="Lidar Status: Running")
                     self.ultrasonic_status_label.config(text="Ultrasonic Status: Running")	
-                    while self.process.poll() is None:  # While the process is running
-                            output = self.process.stdout.readline()
-                            
-                            if output:
-                                #self.lidar_status_label.config(text="Lidar Status: Running")
-                                #self.ultrasonic_status_label.config(text="Ultrasonic Status: Running")
-                                start_time = dt.datetime.now()    
-                                for val in self.lidar.iter_measures():
-                                    if val[3] != 0:
-                                        current_time = (dt.datetime.now() - start_time).total_seconds()
-                                        if self.find_zero_front(val[2], val[3]):
-                                            lidar_distance = val[3]
-                                            ultrasonic_distance = self.ultrasonic(self.channel)
-                                            
-                                            #Calculate the average of LIDAR and ultrasonic distances
-                                            average_distance = (lidar_distance + ultrasonic_distance) / 2
-                                            self.average_distance_var.set("Obstacle Distance: {:.2f}".format(average_distance))
-                                            print("Average Distance: {:.2f} Lidar:{:.2f} Sonar:{:.2f}".format(average_distance, lidar_distance, ultrasonic_distance))
-                                        
+                    
+                    #self.lidar_status_label.config(text="Lidar Status: Running")
+                    #self.ultrasonic_status_label.config(text="Ultrasonic Status: Running")
+                    start_time = dt.datetime.now()
+                    for val in self.lidar.iter_measures():
+                            if val[3] != 0:
+                                current_time = (dt.datetime.now() - start_time).total_seconds()
+                                if self.find_zero_front(val[2], val[3]):
+                                    lidar_distance = val[3]
+                                    ultrasonic_distance = self.ultrasonic(self.channel)
+                                    
+                                    #Calculate the average of LIDAR and ultrasonic distances
+                                    average_distance = (lidar_distance + ultrasonic_distance) / 2
+                                    self.average_distance_var.set("Obstacle Distance: {:.2f}".format(average_distance))
+                                    print("Average Distance: {:.2f} Lidar:{:.2f} Sonar:{:.2f}".format(average_distance, lidar_distance, ultrasonic_distance))
+                                
 
-                                            #Update button colors based on conditions (modify as needed)
-                                            if average_distance > 1:
-                                                self.show_green()
-                                            else:
-                                                self.show_red_lidar()
-                                                self.show_red_ultrasonic()
+                                    #Update button colors based on conditions (modify as needed)
+                                    if average_distance > 1:
+                                        self.show_green()
+                                    else:
+                                        self.show_red_lidar()
+                                        self.show_red_ultrasonic()
                           
             # except KeyboardInterrupt:
                 # pass
