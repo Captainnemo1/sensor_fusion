@@ -80,7 +80,7 @@ class ObjectDetectionGUI:
         self.draw_lights("red", "red")
     
     def show_red_camera(self):
-        self.draw_lights("red", "red")
+        self.draw_light("red")
         
     def show_green(self):
         self.draw_lights("green", "green")
@@ -104,12 +104,18 @@ class ObjectDetectionGUI:
             messagebox.showerror("Error", "Object detection script not found.")
         except Exception as e:
             messagebox.showerror("Error", f"An error occurred: {str(e)}")
+            self.show_red_camera()
 
     def stop_detection(self):
+        self.show_red_lidar()
+        self.show_red_ultrasonic()
+        self.show_red_camera()
         if self.process:
+            #
             self.process.terminate()
             self.start_button.config(state=tk.NORMAL)
             self.stop_button.config(state=tk.DISABLED)
+            
 
         if self.lidar_thread:
             self.lidar_running = False
@@ -145,17 +151,12 @@ class ObjectDetectionGUI:
 
                     for val in lidar.iter_measures():
                         if val[3] != 0:
+                            self.show_green()
                             if self.find_zero_front(val[2], val[3]):
-                                self.ultrasonic(channel)
-                                average_distance = (self.ultrasonic(channel) + val[3]) / 2
+                                #self.ultrasonic(channel)
+                                ultdist=self.ultrasonic(channel)
+                                average_distance = (ultdist + val[3]) / 2
                                 self.average_distance_var.set("Average Distance: {:.2f} mm".format(average_distance))
-                                
-                                if average_distance > 1:
-                                    self.show_green()
-                                else:
-                                    self.show_red_lidar()
-                                    self.show_red_ultrasonic()
-                                    
                                 self.master.update_idletasks()
 
                 except RPLidarException as e:
@@ -173,15 +174,15 @@ class ObjectDetectionGUI:
     def find_zero_front(angle, distance):
         min_range = range(0, 5)
         max_range = range(355, 360)
-        if int(angle) == 0 or int(angle) in min_range or int(angle) in max_range:
-            print("Lidar distance: {} millimeter".format(distance))
+        if int(angle) in min_range or int(angle) in max_range:
+            #print("Lidar distance: {} millimeter".format(distance))
             return True
         return False
 
     @staticmethod
     def ultrasonic(channel):
         dist = ((channel.value / 1024) * 4.88) * 2.64 * 10
-        print("Ultrasonic Distance: ", round(dist, 2))
+        #print("Ultrasonic Distance: ", round(dist, 2))
         return dist
 
 if __name__ == "__main__":
