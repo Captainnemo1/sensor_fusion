@@ -15,9 +15,27 @@ from adafruit_ads1x15.analog_in import AnalogIn
 class ObjectDetectionGUI:
     def __init__(self, master):
         self.master = master
-        master.title("Sensor Fusion")
-        master.configure(bg="green")
+        master.title("GUI")
         master.geometry("800x700")
+        master.configure(bg="#000000")  # Dark background color
+        
+        # Centering the label and buttons
+        master.columnconfigure(0, weight=1)
+        master.columnconfigure(1, weight=1)
+        master.rowconfigure(0, weight=1)
+        
+        # Styles
+        style = ttk.Style()
+        style.configure("TLabel", font=("Arial", 20, "bold"), foreground="white", background="#000000")
+
+        # Labels
+        heading_font = ("Arial", 15 , "bold")
+        some_font = ("Arial", 22, "bold")
+        text_font = ("Arial", 20, "bold")
+
+         # Place Verolt label at top-left
+        name_label = tk.Label(master, text="Verolt", font=heading_font, bg="#000000", fg="red")
+        name_label.place(x=10, y=10)
         
         # Load and display an image
         image_path = "/home/velabs/Desktop/picture.png"  # Replace with the actual path to your image
@@ -25,68 +43,69 @@ class ObjectDetectionGUI:
         photo = ImageTk.PhotoImage(image)
         self.image_label = tk.Label(master, image=photo)
         self.image_label.image = photo  # Keep a reference to the image to avoid garbage collection
-        self.image_label.pack()
+        self.image_label.grid(row=2, column=0, columnspan=2, padx=10, pady=10, sticky="n")  # Centered using sticky
+        
+        # Place SENSOR FUSION label beside Verolt in the same line and centered
+        sensor_fusion_label = tk.Label(master, text="SENSOR FUSION", font=some_font, bg="#000000", fg="white")
+        sensor_fusion_label.place(relx=0.5, rely=0, anchor="n")
+        
+        #self.start_button = tk.Button(master, text="Start", command=self.start_button_click, font=text_font, bd=0, padx=20, pady=10, fg="white", bg="#333333")
+        #self.start_button.grid(row=2, column=0, columnspan=2, padx=10, pady=10, sticky="n")  # Centered using sticky
+        
+        self.start_button = tk.Button(master, text="Start Object Detection", command=self.start_detection, font=text_font, bd=0, padx=20, pady=10, fg="white", bg="#333333")
+        self.start_button.grid(row=2, column=0, columnspan=2, padx=10, pady=10, sticky="n")  # Centered using sticky
+        
+             
+        self.lidar_status_label = ttk.Label(master, text="Lidar Status", style="TLabel")
+        self.lidar_status_label.grid(row=3, column=0, padx=(10, 0), pady=10, sticky="w")
+        
+        self.lidar_status_symbol = tk.Canvas(master, width=30, height=30, bg="#000000", highlightthickness=0)
+        self.lidar_status_symbol.grid(row=3, column=1, padx=(0, 10), pady=10, sticky="w")
+        self.lidar_oval = self.lidar_status_symbol.create_oval(0, 0, 30, 30, fill="red")  # Oval shape with red fill
 
-        self.start_button = tk.Button(master, text="Start Object Detection", command=self.start_detection)
-        self.start_button.pack(pady=10)
-        
-        self.camera_status_label = tk.Label(master, text="Camera Status", fg="white", bg="grey", anchor=tk.W, font=("Arial", 20), pady=10)
-        self.camera_status_label.pack()
-        
-        self.red_button_color_camera = tk.StringVar()
-        self.red_button_color_camera.set("red")
-        self.red_button_camera = tk.Button(self.master, command=self.show_red_camera, padx=20, bg=self.red_button_color_camera.get())
-        self.red_button_camera.pack(pady=10)
-        
-        self.lidar_status_label = tk.Label(master, text="Lidar Status", fg="white", bg="grey", anchor=tk.W, font=("Arial", 20), pady=10)
-        self.lidar_status_label.pack()
-        
-        self.red_button_color_lidar = tk.StringVar()
-        self.red_button_color_lidar.set("red")
-        self.red_button_lidar = tk.Button(self.master, command=self.show_red_lidar, padx=20, bg=self.red_button_color_lidar.get())
-        self.red_button_lidar.pack(pady=10)
+        self.ultrasonic_status_label = ttk.Label(master, text="Ultrasonic Status",style="TLabel")
+        self.ultrasonic_status_label.grid(row=4, column=0, padx=(10, 0), pady=10, sticky="w")       
 
-        self.ultrasonic_status_label = tk.Label(master, text="Ultrasonic Status", fg="white", bg="grey", anchor=tk.W, font=("Arial", 20), pady=10)
-        self.ultrasonic_status_label.pack()       
+        # self.ultrasonic_status_label = ttk.Label(master, text="Ultrasonic Status: Inactive", style="TLabel")
+        # self.ultrasonic_status_label.grid(row=4, column=0, padx=(10, 0), pady=10, sticky="w")
 
-        self.red_button_color_ultrasonic = tk.StringVar()
-        self.red_button_color_ultrasonic.set("red")
-        self.red_button_ultrasonic = tk.Button(self.master, command=self.show_red_ultrasonic, padx=20, bg=self.red_button_color_ultrasonic.get())
-        self.red_button_ultrasonic.pack(pady=10)
+        self.ultrasonic_status_shape = tk.Canvas(master, width=30, height=30, bg="#000000", highlightthickness=0)
+        self.ultrasonic_status_shape.grid(row=4, column=1, padx=(0, 10), pady=10, sticky="w")
+        self.ultrasonic_oval = self.ultrasonic_status_shape.create_oval(0, 0, 30, 30, fill="red")  # Oval shape with red fill
         
-        self.stop_button = tk.Button(master, text="Stop Object Detection", command=self.stop_detection, state=tk.DISABLED)
-        self.stop_button.pack(pady=10)
+        self.stop_button = tk.Button(master, text="Stop Object Detection", command=self.stop_detection, font=text_font, bd=0, padx=20, pady=10, fg="white", bg="#333333", state=tk.DISABLED)
+        self.stop_button.grid(row=6, column=0, columnspan=2, padx=10, pady=10, sticky="n")  # Centered using sticky
 
         self.average_distance_var = tk.StringVar()
         self.average_distance_label = tk.Label(master, textvariable=self.average_distance_var, bg="black", fg="white", font=("Arial", 16), pady=10)
-        self.average_distance_label.pack()
+        self.average_distance_label.grid(row=5, column=1, padx=10, pady=10, sticky="w")
 
         self.process = None  # Variable to store the subprocess object
         self.lidar_thread = None  # Variable to store the Lidar thread
         self.lidar_running = False  # Flag to indicate if Lidar is running
     
-    def draw_lights(self, red_color_lidar, red_color_ultrasonic):
-        # Clear previous drawings
-        self.red_button_lidar.config(bg=red_color_lidar)
-        self.red_button_ultrasonic.config(bg=red_color_ultrasonic)
+    # def draw_lights(self, red_color_lidar, red_color_ultrasonic):
+        # # Clear previous drawings
+        # self.red_button_lidar.config(bg=red_color_lidar)
+        # self.red_button_ultrasonic.config(bg=red_color_ultrasonic)
         
-    def draw_light(self, red_color_camera):
-        self.red_button_camera.config(bg=red_color_camera)
+    # def draw_light(self, red_color_camera):
+        # self.red_button_camera.config(bg=red_color_camera)
         
-    def show_red_lidar(self):
-        self.draw_lights("red", "red")
+    # def show_red_lidar(self):
+        # self.draw_lights("red", "red")
 
-    def show_red_ultrasonic(self):
-        self.draw_lights("red", "red")
+    # def show_red_ultrasonic(self):
+        # self.draw_lights("red", "red")
     
-    def show_red_camera(self):
-        self.draw_light("red")
+    # def show_red_camera(self):
+        # self.draw_light("red")
         
-    def show_green(self):
-        self.draw_lights("green", "green")
+    # def show_green(self):
+        # self.draw_lights("green", "green")
     
-    def show_camera_status(self):
-        self.draw_light("green")
+    # def show_camera_status(self):
+        # self.draw_light("green")
         
     def start_detection(self):
         try:
@@ -98,7 +117,11 @@ class ObjectDetectionGUI:
 
             self.start_button.config(state=tk.DISABLED)
             self.stop_button.config(state=tk.NORMAL)
-            self.show_camera_status()
+            self.lidar_status_label.config(text="Lidar Status: Active")
+            self.lidar_status_symbol.itemconfig(self.lidar_oval, fill="green")  # Change oval color to green
+
+            self.ultrasonic_status_label.config(text="Ultrasonic Status: Active")
+            self.ultrasonic_status_shape.itemconfig(self.ultrasonic_oval, fill="green")  # Change oval color to green
 
         except FileNotFoundError:
             messagebox.showerror("Error", "Object detection script not found.")
@@ -107,9 +130,12 @@ class ObjectDetectionGUI:
             self.show_red_camera()
 
     def stop_detection(self):
-        self.show_red_lidar()
-        self.show_red_ultrasonic()
-        self.show_red_camera()
+        self.lidar_status_label.config(text="Lidar Status: Inactive")
+        self.lidar_status_symbol.itemconfig(self.lidar_oval, fill="red")  # Change oval color to red
+
+        self.ultrasonic_status_label.config(text="Ultrasonic Status: Inactive")
+        self.ultrasonic_status_shape.itemconfig(self.ultrasonic_oval, fill="red")  # Change oval color to red
+        
         if self.process:
             #
             self.process.terminate()
