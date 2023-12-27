@@ -1,0 +1,10 @@
+rplidar-roboticia>=0.9.5
+matplotlib~=3.5.1
+numpy~=1.21.5
+adafruit-ads1x15
+Adafruit-Blinka
+adafruit-circuitpython-adafruitio
+adafruit-circuitpython-busdevice
+thread
+subprocess
+datetime3
